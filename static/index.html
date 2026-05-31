@@ -122,59 +122,70 @@
                             <div class="custom-select" id="platformSelectWrapper">
                                 <div class="select-trigger" id="platformTrigger">
                                     <span class="select-value">选择平台</span>
-                                    <svg class="select-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                        <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <svg class="select-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
                                 </div>
-                                <div class="select-dropdown" id="platformDropdown">
-                                    <div class="dropdown-search">
-                                        <input type="text" placeholder="搜索平台..." id="platformSearch">
+                                <input type="hidden" id="platformSelect" required>
+                            </div>
+                        </div>
+
+                        <div class="select-dropdown-overlay" id="platformDropdownOverlay">
+                            <div class="select-dropdown" id="platformDropdown">
+                                <div class="select-dropdown-header">
+                                    <div class="select-dropdown-title">选择平台</div>
+                                    <button class="select-dropdown-close" id="platformDropdownClose" type="button">
+                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                            <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="dropdown-search">
+                                    <input type="text" placeholder="搜索平台..." id="platformSearch">
+                                </div>
+                                <div class="dropdown-options">
+                                    <div class="dropdown-group">
+                                        <div class="dropdown-group-label">海外平台</div>
+                                        <div class="dropdown-option" data-value="OpenAI">OpenAI (GPT)</div>
+                                        <div class="dropdown-option" data-value="Claude">Anthropic (Claude)</div>
+                                        <div class="dropdown-option" data-value="Gemini">Google (Gemini)</div>
+                                        <div class="dropdown-option" data-value="Mistral">Mistral AI</div>
+                                        <div class="dropdown-option" data-value="Grok">xAI (Grok)</div>
+                                        <div class="dropdown-option" data-value="Meta">Meta (Llama)</div>
+                                        <div class="dropdown-option" data-value="Together">Together AI</div>
+                                        <div class="dropdown-option" data-value="Fireworks">Fireworks AI</div>
+                                        <div class="dropdown-option" data-value="Groq">Groq</div>
+                                        <div class="dropdown-option" data-value="Cohere">Cohere</div>
+                                        <div class="dropdown-option" data-value="Perplexity">Perplexity</div>
+                                        <div class="dropdown-option" data-value="Replicate">Replicate</div>
+                                        <div class="dropdown-option" data-value="HuggingFace">Hugging Face</div>
                                     </div>
-                                    <div class="dropdown-options">
-                                        <div class="dropdown-group">
-                                            <div class="dropdown-group-label">海外平台</div>
-                                            <div class="dropdown-option" data-value="OpenAI">OpenAI (GPT)</div>
-                                            <div class="dropdown-option" data-value="Claude">Anthropic (Claude)</div>
-                                            <div class="dropdown-option" data-value="Gemini">Google (Gemini)</div>
-                                            <div class="dropdown-option" data-value="Mistral">Mistral AI</div>
-                                            <div class="dropdown-option" data-value="Grok">xAI (Grok)</div>
-                                            <div class="dropdown-option" data-value="Meta">Meta (Llama)</div>
-                                            <div class="dropdown-option" data-value="Together">Together AI</div>
-                                            <div class="dropdown-option" data-value="Fireworks">Fireworks AI</div>
-                                            <div class="dropdown-option" data-value="Groq">Groq</div>
-                                            <div class="dropdown-option" data-value="Cohere">Cohere</div>
-                                            <div class="dropdown-option" data-value="Perplexity">Perplexity</div>
-                                            <div class="dropdown-option" data-value="Replicate">Replicate</div>
-                                            <div class="dropdown-option" data-value="HuggingFace">Hugging Face</div>
-                                        </div>
-                                        <div class="dropdown-group">
-                                            <div class="dropdown-group-label">国内平台</div>
-                                            <div class="dropdown-option" data-value="DeepSeek">DeepSeek (深度求索)</div>
-                                            <div class="dropdown-option" data-value="Doubao">豆包大模型 (字节跳动)</div>
-                                            <div class="dropdown-option" data-value="Spark">讯飞星火</div>
-                                            <div class="dropdown-option" data-value="Wenxin">百度文心一言</div>
-                                            <div class="dropdown-option" data-value="Qwen">阿里通义千问</div>
-                                            <div class="dropdown-option" data-value="GLM">智谱ChatGLM</div>
-                                            <div class="dropdown-option" data-value="Kimi">月之暗面 (Kimi)</div>
-                                            <div class="dropdown-option" data-value="MiniMax">MiniMax (海螺AI)</div>
-                                            <div class="dropdown-option" data-value="Yi">零一万物 (Yi)</div>
-                                            <div class="dropdown-option" data-value="Baichuan">百川智能</div>
-                                            <div class="dropdown-option" data-value="StepFun">阶跃星辰</div>
-                                            <div class="dropdown-option" data-value="SiliconFlow">硅基流动</div>
-                                            <div class="dropdown-option" data-value="Hunyuan">腾讯混元</div>
-                                            <div class="dropdown-option" data-value="SenseTime">商汤日日新</div>
-                                            <div class="dropdown-option" data-value="Zhipu">360智脑</div>
-                                            <div class="dropdown-option" data-value="Tiangong">昆仑万维天工</div>
-                                            <div class="dropdown-option" data-value="Huawei">华为盘古</div>
-                                            <div class="dropdown-option" data-value="MiMo">Xiaomi MiMo</div>
-                                            <div class="dropdown-option" data-value="BlueLM">vivo蓝心大模型</div>
-                                        </div>
-                                        <div class="dropdown-group">
-                                            <div class="dropdown-option" data-value="其他">其他</div>
-                                        </div>
+                                    <div class="dropdown-group">
+                                        <div class="dropdown-group-label">国内平台</div>
+                                        <div class="dropdown-option" data-value="DeepSeek">DeepSeek (深度求索)</div>
+                                        <div class="dropdown-option" data-value="Doubao">豆包大模型 (字节跳动)</div>
+                                        <div class="dropdown-option" data-value="Spark">讯飞星火</div>
+                                        <div class="dropdown-option" data-value="Wenxin">百度文心一言</div>
+                                        <div class="dropdown-option" data-value="Qwen">阿里通义千问</div>
+                                        <div class="dropdown-option" data-value="GLM">智谱ChatGLM</div>
+                                        <div class="dropdown-option" data-value="Kimi">月之暗面 (Kimi)</div>
+                                        <div class="dropdown-option" data-value="MiniMax">MiniMax (海螺AI)</div>
+                                        <div class="dropdown-option" data-value="Yi">零一万物 (Yi)</div>
+                                        <div class="dropdown-option" data-value="Baichuan">百川智能</div>
+                                        <div class="dropdown-option" data-value="StepFun">阶跃星辰</div>
+                                        <div class="dropdown-option" data-value="SiliconFlow">硅基流动</div>
+                                        <div class="dropdown-option" data-value="Hunyuan">腾讯混元</div>
+                                        <div class="dropdown-option" data-value="SenseTime">商汤日日新</div>
+                                        <div class="dropdown-option" data-value="Zhipu">360智脑</div>
+                                        <div class="dropdown-option" data-value="Tiangong">昆仑万维天工</div>
+                                        <div class="dropdown-option" data-value="Huawei">华为盘古</div>
+                                        <div class="dropdown-option" data-value="MiMo">Xiaomi MiMo</div>
+                                        <div class="dropdown-option" data-value="BlueLM">vivo蓝心大模型</div>
+                                    </div>
+                                    <div class="dropdown-group">
+                                        <div class="dropdown-option" data-value="其他">其他</div>
                                     </div>
                                 </div>
-                                <input type="hidden" id="platformSelect" required>
                             </div>
                         </div>
 
@@ -211,7 +222,7 @@
                             <label class="form-label">失效时间</label>
                             <div class="date-picker-wrapper">
                                 <div class="date-picker" id="datePicker">
-                                    <div class="date-display">
+                                    <div class="date-display" id="dateDisplayTrigger">
                                         <span class="date-text" id="dateDisplay">选择日期</span>
                                         <svg class="date-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
                                             <rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/>
@@ -222,32 +233,43 @@
                                     </div>
                                     <input type="hidden" id="expiresAtInput" required>
                                 </div>
-                                <div class="calendar-dropdown" id="calendarDropdown">
-                                    <div class="calendar-header">
-                                        <button class="calendar-nav" id="prevMonth">
-                                            <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
-                                                <path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </button>
-                                        <div class="calendar-title" id="calendarTitle"></div>
-                                        <button class="calendar-nav" id="nextMonth">
-                                            <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
-                                                <path d="M2 1L7 6L2 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="calendar-weekdays">
-                                        <span>日</span>
-                                        <span>一</span>
-                                        <span>二</span>
-                                        <span>三</span>
-                                        <span>四</span>
-                                        <span>五</span>
-                                        <span>六</span>
-                                    </div>
-                                    <div class="calendar-days" id="calendarDays"></div>
-                                    <div class="calendar-footer">
-                                        <button class="calendar-today" id="todayBtn">今天</button>
+
+                                <div class="calendar-dropdown-overlay" id="calendarDropdownOverlay">
+                                    <div class="calendar-dropdown" id="calendarDropdown">
+                                        <div class="select-dropdown-header">
+                                            <div class="select-dropdown-title">选择日期</div>
+                                            <button class="select-dropdown-close" id="calendarDropdownClose" type="button">
+                                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                                    <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div class="calendar-header">
+                                            <button class="calendar-nav" id="prevMonth">
+                                                <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
+                                                    <path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </button>
+                                            <div class="calendar-title" id="calendarTitle"></div>
+                                            <button class="calendar-nav" id="nextMonth">
+                                                <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
+                                                    <path d="M2 1L7 6L2 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div class="calendar-weekdays">
+                                            <span>日</span>
+                                            <span>一</span>
+                                            <span>二</span>
+                                            <span>三</span>
+                                            <span>四</span>
+                                            <span>五</span>
+                                            <span>六</span>
+                                        </div>
+                                        <div class="calendar-days" id="calendarDays"></div>
+                                        <div class="calendar-footer">
+                                            <button class="calendar-today" id="todayBtn">今天</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -1132,27 +1132,30 @@ a.btn-link::after {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 12px 16px;
-    background: #000000;
-    border: 1px solid var(--border-hover);
-    border-radius: 12px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
     color: #ffffff;
     font-size: 15px;
     font-family: 'Inter', 'Noto Sans SC', sans-serif;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
     user-select: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .select-trigger:hover {
     border-color: var(--apple-blue);
-    background: #0a0a0a;
+    background: linear-gradient(135deg, #1e1e3a 0%, #1a2545 100%);
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.15);
+    transform: translateY(-1px);
 }
 
 .select-trigger.active {
     border-color: var(--apple-blue);
     box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
-    background: #0a0a0a;
+    background: linear-gradient(135deg, #1e1e3a 0%, #1a2545 100%);
 }
 
 .select-trigger.has-value {
@@ -1161,51 +1164,108 @@ a.btn-link::after {
 
 .select-arrow {
     transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.6);
     flex-shrink: 0;
 }
 
-.select-trigger.active .select-arrow {
-    transform: rotate(180deg);
+.select-trigger:hover .select-arrow {
+    color: var(--apple-blue);
+}
+
+.select-dropdown-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 3000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.select-dropdown-overlay.open {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .select-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    right: 0;
-    background: #000000;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border: 1px solid var(--border-hover);
-    border-radius: 16px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-    z-index: 999;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px) scale(0.98);
-    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    margin: 0 auto;
+    width: 100%;
+    max-width: 420px;
+    max-height: 85vh;
+    background: #1a1a2e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    z-index: 1002;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideIn 0.3s ease-out;
 }
 
-.select-dropdown.open {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.select-dropdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.select-dropdown-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+.select-dropdown-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.select-dropdown-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
 }
 
 .dropdown-search {
-    padding: 12px;
-    border-bottom: 1px solid var(--border-hover);
-    background: #000000;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: transparent;
 }
 
 .dropdown-search input {
     width: 100%;
-    padding: 10px 14px;
-    background: #1a1a1a;
-    border: 1px solid var(--border-hover);
-    border-radius: 10px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
     color: #ffffff;
     font-size: 14px;
     font-family: 'Inter', 'Noto Sans SC', sans-serif;
@@ -1216,18 +1276,19 @@ a.btn-link::after {
 .dropdown-search input:focus {
     border-color: var(--apple-blue);
     box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
-    background: #222222;
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .dropdown-search input::placeholder {
-    color: #888888;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .dropdown-options {
-    max-height: 280px;
+    flex: 1;
     overflow-y: auto;
-    padding: 8px;
-    background: #000000;
+    padding: 12px 16px;
+    background: transparent;
+    min-height: 0;
 }
 
 .dropdown-options::-webkit-scrollbar {
@@ -1239,38 +1300,38 @@ a.btn-link::after {
 }
 
 .dropdown-options::-webkit-scrollbar-thumb {
-    background: #333333;
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 3px;
 }
 
 .dropdown-group {
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .dropdown-group-label {
-    padding: 8px 12px 4px;
-    font-size: 11px;
+    padding: 12px 12px 6px;
+    font-size: 12px;
     font-weight: 600;
-    color: #888888;
+    color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
 }
 
 .dropdown-option {
-    padding: 10px 12px;
-    border-radius: 10px;
-    font-size: 14px;
-    color: #ffffff;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.85);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     background: transparent;
 }
 
 .dropdown-option:hover {
-    background: #222222;
+    background: rgba(255, 255, 255, 0.08);
     color: #ffffff;
 }
 
@@ -1283,7 +1344,7 @@ a.btn-link::after {
     display: none;
 }
 
-/* 自定义日期选择器 - Apple风格 */
+/* 自定义日期选择器 - 弹窗风格 */
 .date-picker-wrapper {
     position: relative;
     width: 100%;
@@ -1298,27 +1359,30 @@ a.btn-link::after {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 12px 16px;
-    background: #000000;
-    border: 1px solid var(--border-hover);
-    border-radius: 12px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
     color: #ffffff;
     font-size: 15px;
     font-family: 'Inter', 'Noto Sans SC', sans-serif;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
     user-select: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .date-display:hover {
     border-color: var(--apple-blue);
-    background: #0a0a0a;
+    background: linear-gradient(135deg, #1e1e3a 0%, #1a2545 100%);
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.15);
+    transform: translateY(-1px);
 }
 
 .date-display.active {
     border-color: var(--apple-blue);
     box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
-    background: #0a0a0a;
+    background: linear-gradient(135deg, #1e1e3a 0%, #1a2545 100%);
 }
 
 .date-display.has-value {
@@ -1326,75 +1390,80 @@ a.btn-link::after {
 }
 
 .date-icon {
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.6);
     flex-shrink: 0;
     transition: color 0.2s ease;
 }
 
 .date-display:hover .date-icon {
-    color: #ffffff;
-}
-
-.date-display.active .date-icon {
     color: var(--apple-blue);
 }
 
-.calendar-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
+.calendar-dropdown-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
     left: 0;
-    right: 0;
-    background: #000000;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border: 1px solid var(--border-hover);
-    border-radius: 16px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
-    z-index: 999;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px) scale(0.98);
-    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-    padding: 16px;
-    min-width: 300px;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 3000;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-.calendar-dropdown.open {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
+.calendar-dropdown-overlay.open {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-dropdown {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 380px;
+    background: #1a1a2e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    z-index: 1002;
+    padding: 20px;
+    animation: modalSlideIn 0.3s ease-out;
 }
 
 .calendar-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    padding-top: 8px;
 }
 
 .calendar-title {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
     color: #ffffff;
     letter-spacing: -0.02em;
 }
 
 .calendar-nav {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.06);
     border: none;
-    border-radius: 8px;
-    color: #ffffff;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.7);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .calendar-nav:hover {
-    background: #222222;
+    background: rgba(255, 255, 255, 0.12);
     color: #ffffff;
 }
 
@@ -1413,8 +1482,8 @@ a.btn-link::after {
     text-align: center;
     font-size: 12px;
     font-weight: 500;
-    color: #888888;
-    padding: 4px;
+    color: rgba(255, 255, 255, 0.4);
+    padding: 8px 4px;
 }
 
 .calendar-days {
@@ -1428,10 +1497,10 @@ a.btn-link::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 14px;
     font-weight: 400;
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.85);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
     border: none;
@@ -1439,12 +1508,12 @@ a.btn-link::after {
 }
 
 .calendar-day:hover {
-    background: #222222;
+    background: rgba(255, 255, 255, 0.08);
     color: #ffffff;
 }
 
 .calendar-day.today {
-    background: #222222;
+    background: rgba(255, 255, 255, 0.08);
     font-weight: 600;
     color: #ffffff;
 }
@@ -1456,8 +1525,7 @@ a.btn-link::after {
 }
 
 .calendar-day.other-month {
-    color: #555555;
-    opacity: 0.5;
+    color: rgba(255, 255, 255, 0.25);
 }
 
 .calendar-day:disabled {
@@ -1471,20 +1539,20 @@ a.btn-link::after {
 }
 
 .calendar-footer {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border-hover);
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     justify-content: center;
 }
 
 .calendar-today {
-    padding: 8px 16px;
-    background: transparent;
-    border: 1px solid var(--border-hover);
-    border-radius: 8px;
+    padding: 10px 24px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
     color: var(--apple-blue);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1492,7 +1560,7 @@ a.btn-link::after {
 }
 
 .calendar-today:hover {
-    background: #222222;
+    background: rgba(255, 255, 255, 0.1);
     border-color: var(--apple-blue);
     color: #ffffff;
 }

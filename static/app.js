@@ -1098,58 +1098,50 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(initAllAnimations, 100);
 });
 
-// 自定义下拉菜单 - Apple风格
+// 自定义下拉菜单 - 弹窗风格
 function initCustomSelect() {
     const wrapper = document.getElementById('platformSelectWrapper');
     const trigger = document.getElementById('platformTrigger');
+    const overlay = document.getElementById('platformDropdownOverlay');
     const dropdown = document.getElementById('platformDropdown');
+    const closeBtn = document.getElementById('platformDropdownClose');
     const searchInput = document.getElementById('platformSearch');
     const hiddenInput = document.getElementById('platformSelect');
     const options = dropdown.querySelectorAll('.dropdown-option');
     const triggerText = trigger.querySelector('.select-value');
-    const originalParent = dropdown.parentNode;
-
-    function positionDropdown() {
-        const rect = trigger.getBoundingClientRect();
-        dropdown.style.position = 'fixed';
-        dropdown.style.top = (rect.bottom + 8) + 'px';
-        dropdown.style.left = rect.left + 'px';
-        dropdown.style.width = rect.width + 'px';
-    }
 
     function openDropdown() {
-        positionDropdown();
-        dropdown.dataset.originalParent = originalParent.id;
-        document.body.appendChild(dropdown);
-        dropdown.classList.add('open');
+        overlay.classList.add('open');
         trigger.classList.add('active');
         if (searchInput) {
             searchInput.value = '';
-            searchInput.focus();
+            setTimeout(() => searchInput.focus(), 100);
             filterOptions('');
         }
     }
 
     function closeDropdown() {
-        dropdown.classList.remove('open');
+        overlay.classList.remove('open');
         trigger.classList.remove('active');
-        dropdown.style.position = '';
-        dropdown.style.top = '';
-        dropdown.style.left = '';
-        dropdown.style.width = '';
-        delete dropdown.dataset.originalParent;
-        originalParent.appendChild(dropdown);
     }
 
     // 切换下拉菜单
     trigger.addEventListener('click', (e) => {
         e.stopPropagation();
-        const isOpen = dropdown.classList.contains('open');
+        const isOpen = overlay.classList.contains('open');
         closeAllDropdowns();
         if (!isOpen) {
             openDropdown();
         }
     });
+
+    // 关闭按钮
+    if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeDropdown();
+        });
+    }
 
     // 选择选项
     options.forEach(option => {
@@ -1186,9 +1178,9 @@ function initCustomSelect() {
         });
     }
 
-    // 点击外部关闭
-    document.addEventListener('click', () => {
-        if (dropdown.classList.contains('open')) {
+    // 点击遮罩层关闭
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
             closeDropdown();
         }
     });
@@ -1199,17 +1191,10 @@ function initCustomSelect() {
     });
 
     // 键盘导航
-    wrapper.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.classList.contains('open')) {
             closeDropdown();
             trigger.focus();
-        }
-    });
-
-    // 窗口大小变化时重新定位
-    window.addEventListener('resize', () => {
-        if (dropdown.classList.contains('open')) {
-            positionDropdown();
         }
     });
 }
@@ -1247,91 +1232,72 @@ function filterOptions(searchTerm) {
 
 // 关闭所有下拉菜单
 function closeAllDropdowns() {
-    document.querySelectorAll('.select-dropdown').forEach(d => {
-        d.classList.remove('open');
-        if (d.dataset.originalParent) {
-            const parent = document.getElementById(d.dataset.originalParent);
-            if (parent) {
-                d.style.position = '';
-                d.style.top = '';
-                d.style.left = '';
-                d.style.width = '';
-                parent.appendChild(d);
-                delete d.dataset.originalParent;
-            }
-        }
+    // 关闭平台选择弹窗
+    document.querySelectorAll('.select-dropdown-overlay').forEach(o => {
+        o.classList.remove('open');
     });
     document.querySelectorAll('.select-trigger').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.calendar-dropdown').forEach(d => {
-        d.classList.remove('open');
-        if (d.dataset.originalParent) {
-            const parent = document.getElementById(d.dataset.originalParent);
-            if (parent) {
-                d.style.position = '';
-                d.style.top = '';
-                d.style.left = '';
-                d.style.width = '';
-                parent.appendChild(d);
-                delete d.dataset.originalParent;
-            }
-        }
+
+    // 关闭日历弹窗
+    document.querySelectorAll('.calendar-dropdown-overlay').forEach(o => {
+        o.classList.remove('open');
     });
     document.querySelectorAll('.date-display').forEach(d => d.classList.remove('active'));
+
+    // 恢复页面滚动
+    document.body.style.overflow = '';
 }
 
 // 日期选择器 - Apple风格
 function initDatePicker() {
     const datePicker = document.getElementById('datePicker');
+    const dateDisplayTrigger = document.getElementById('dateDisplayTrigger');
     const dateDisplay = document.getElementById('dateDisplay');
+    const overlay = document.getElementById('calendarDropdownOverlay');
     const calendarDropdown = document.getElementById('calendarDropdown');
+    const closeBtn = document.getElementById('calendarDropdownClose');
     const calendarTitle = document.getElementById('calendarTitle');
     const calendarDays = document.getElementById('calendarDays');
     const prevMonthBtn = document.getElementById('prevMonth');
     const nextMonthBtn = document.getElementById('nextMonth');
     const todayBtn = document.getElementById('todayBtn');
     const hiddenInput = document.getElementById('expiresAtInput');
-    const originalCalendarParent = calendarDropdown.parentNode;
 
     let currentDate = new Date();
     let selectedDate = null;
 
-    function positionCalendarDropdown() {
-        const rect = dateDisplay.getBoundingClientRect();
-        calendarDropdown.style.position = 'fixed';
-        calendarDropdown.style.top = (rect.bottom + 8) + 'px';
-        calendarDropdown.style.left = rect.left + 'px';
-        calendarDropdown.style.width = rect.width + 'px';
-    }
+    const originalParent = overlay.parentNode;
 
     function openCalendar() {
-        positionCalendarDropdown();
-        calendarDropdown.dataset.originalParent = originalCalendarParent.id;
-        document.body.appendChild(calendarDropdown);
-        calendarDropdown.classList.add('open');
-        dateDisplay.classList.add('active');
+        document.body.appendChild(overlay);
+        overlay.classList.add('open');
+        dateDisplayTrigger.classList.add('active');
         renderCalendar();
     }
 
     function closeCalendar() {
-        calendarDropdown.classList.remove('open');
-        dateDisplay.classList.remove('active');
-        calendarDropdown.style.position = '';
-        calendarDropdown.style.top = '';
-        calendarDropdown.style.left = '';
-        calendarDropdown.style.width = '';
-        delete calendarDropdown.dataset.originalParent;
-        originalCalendarParent.appendChild(calendarDropdown);
+        overlay.classList.remove('open');
+        dateDisplayTrigger.classList.remove('active');
+        originalParent.appendChild(overlay);
     }
 
     // 切换日历显示
-    dateDisplay.addEventListener('click', (e) => {
+    dateDisplayTrigger.addEventListener('click', (e) => {
         e.stopPropagation();
-        const isOpen = calendarDropdown.classList.contains('open');
+        const isOpen = overlay.classList.contains('open');
         closeAllDropdowns();
         if (!isOpen) {
             openCalendar();
         }
     });
+
+    // 关闭按钮
+    if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeCalendar();
+        });
+    }
 
     // 上个月
     prevMonthBtn.addEventListener('click', (e) => {
@@ -1355,9 +1321,9 @@ function initDatePicker() {
         closeCalendar();
     });
 
-    // 点击外部关闭
-    document.addEventListener('click', () => {
-        if (calendarDropdown.classList.contains('open')) {
+    // 点击遮罩层关闭
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
             closeCalendar();
         }
     });
@@ -1367,10 +1333,10 @@ function initDatePicker() {
         e.stopPropagation();
     });
 
-    // 窗口大小变化时重新定位
-    window.addEventListener('resize', () => {
-        if (calendarDropdown.classList.contains('open')) {
-            positionCalendarDropdown();
+    // 键盘导航
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.classList.contains('open')) {
+            closeCalendar();
         }
     });
 
