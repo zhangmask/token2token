@@ -353,6 +353,7 @@ function switchPage(pageName, btn) {
     }
 
     if (pageName === 'mykeys') loadMyKeys();
+    if (pageName === 'logs') loadLogs();
     if (pageName === 'browse') {
         loadStats();
         loadKeys();
@@ -801,6 +802,74 @@ async function loadMyKeys() {
     } catch (error) {
         console.error('加载我的Key失败:', error);
     }
+}
+
+// 加载操作日志
+async function loadLogs() {
+    try {
+        const response = await fetch(API_BASE + `/api/logs?user_id=${currentUser.user_id}`);
+        const logs = await response.json();
+
+        const container = document.getElementById('logsContainer');
+
+        if (logs.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>暂无操作记录</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = logs.map(log => renderLogItem(log)).join('');
+
+        if (typeof gsap !== 'undefined') {
+            gsap.fromTo('.log-item',
+                { opacity: 0, y: 15, scale: 0.98 },
+                { opacity: 1, y: 0, scale: 1, stagger: 0.04, duration: 0.3, ease: 'power2.out' }
+            );
+        }
+    } catch (error) {
+        console.error('加载操作日志失败:', error);
+    }
+}
+
+// 渲染日志条目
+function renderLogItem(log) {
+    const actionMap = {
+        'add': { text: '贡献', class: 'log-action-add' },
+        'assign': { text: '领取', class: 'log-action-assign' },
+        'disable': { text: '禁用', class: 'log-action-disable' }
+    };
+
+    const action = actionMap[log.action] || { text: log.action, class: '' };
+    const time = log.created_at ? log.created_at.replace('T', ' ').substring(0, 19) : '';
+
+    let targetHtml = '';
+    if (log.action === 'add') {
+        targetHtml = `<span class="log-target">平台: ${log.platform}</span>`;
+    } else if (log.action === 'assign') {
+        targetHtml = `<span class="log-target">来源: ${log.target_user_name || '未知'}</span>`;
+    } else if (log.action === 'disable') {
+        targetHtml = `<span class="log-target">使用者: ${log.target_user_name || '无'}</span>`;
+    }
+
+    return `
+        <div class="log-item">
+            <div class="log-header">
+                <span class="log-action ${action.class}">${action.text}</span>
+                <span class="log-time">${time}</span>
+            </div>
+            <div class="log-body">
+                <span class="log-operator">${log.operator_name}</span>
+                <span class="log-detail">${log.detail}</span>
+            </div>
+            <div class="log-footer">
+                ${targetHtml}
+                <span class="log-key">${log.api_key_masked}</span>
+            </div>
+        </div>
+    `;
 }
 
 // 渲染Key卡片（统一函数）

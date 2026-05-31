@@ -1569,6 +1569,103 @@ a.btn-link::after {
     transform: scale(0.97);
 }
 
+/* 操作日志 */
+.logs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.log-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 18px 20px;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--shadow-card);
+    transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.log-item:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.log-action {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 8px;
+    letter-spacing: 0.02em;
+}
+
+.log-action-add {
+    background: rgba(48, 209, 88, 0.15);
+    color: var(--apple-green);
+}
+
+.log-action-assign {
+    background: rgba(0, 113, 227, 0.15);
+    color: var(--apple-blue);
+}
+
+.log-action-disable {
+    background: rgba(255, 69, 58, 0.15);
+    color: var(--apple-red);
+}
+
+.log-time {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.log-body {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.log-operator {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.log-detail {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.log-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.log-target {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.log-key {
+    font-size: 12px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
     .container {

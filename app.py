@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, g
 from flask_cors import CORS
 import sqlite3
 import hashlib
@@ -13,13 +13,23 @@ DATABASE = 'database.db'
 
 
 def get_db():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    return conn
+    if 'db' not in g:
+        g.db = sqlite3.connect(DATABASE)
+        g.db.row_factory = sqlite3.Row
+        g.db.execute('PRAGMA journal_mode=WAL')
+        g.db.execute('PRAGMA foreign_keys=ON')
+    return g.db
+
+
+@app.teardown_appcontext
+def close_db(exception):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
 
 
 def init_db():
-    conn = get_db()
+    conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -51,8 +61,24 @@ def init_db():
 
     try:
         cursor.execute('ALTER TABLE api_keys ADD COLUMN expires_at TEXT')
-    except:
+    except sqlite3.OperationalError:
         pass
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS key_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            action TEXT NOT NULL,
+            key_id INTEGER,
+            platform TEXT,
+            api_key_masked TEXT,
+            operator_id INTEGER NOT NULL,
+            target_user_id INTEGER,
+            detail TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (operator_id) REFERENCES users(id),
+            FOREIGN KEY (target_user_id) REFERENCES users(id)
+        )
+    ''')
 
     conn.commit()
     conn.close()
@@ -60,6 +86,22 @@ def init_db():
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
+
+
+def mask_api_key(api_key):
+    if len(api_key) <= 8:
+        return api_key[:3] + '***'
+    return api_key[:4] + '****' + api_key[-4:]
+
+
+def add_log(action, operator_id, key_id=None, platform=None, api_key=None, target_user_id=None, detail=None):
+    conn = get_db()
+    conn.execute(
+        '''INSERT INTO key_logs (action, key_id, platform, api_key_masked, operator_id, target_user_id, detail)
+           VALUES (?, ?, ?, ?, ?, ?, ?)''',
+        (action, key_id, platform, mask_api_key(api_key) if api_key else None, operator_id, target_user_id, detail)
+    )
+    conn.commit()
 
 
 @app.route('/')
@@ -89,8 +131,6 @@ def register():
         return jsonify({'message': '注册成功', 'user_id': user_id, 'username': username})
     except sqlite3.IntegrityError:
         return jsonify({'error': '用户名已存在'}), 400
-    finally:
-        conn.close()
 
 
 @app.route('/api/login', methods=['POST'])
@@ -110,8 +150,6 @@ def login():
         (username, hash_password(password))
     )
     user = cursor.fetchone()
-
-    conn.close()
 
     if user:
         return jsonify({
@@ -162,7 +200,6 @@ def get_keys():
             'created_at': key['created_at']
         })
 
-    conn.close()
     return jsonify(result)
 
 
@@ -192,10 +229,11 @@ def add_keys():
                    VALUES (?, ?, ?, ?, ?, ?, ?)''',
                 (contributor_id, platform, base_url, json.dumps(models), key.strip(), claimed_quota, expires_at)
             )
+            add_log('add', operator_id=contributor_id, key_id=cursor.lastrowid, platform=platform, api_key=key.strip(),
+                    detail=f'添加了 {platform} 的 Key')
             added_count += 1
 
     conn.commit()
-    conn.close()
 
     return jsonify({'message': f'成功添加 {added_count} 个Key'})
 
@@ -219,7 +257,6 @@ def assign_by_platform():
     key = cursor.fetchone()
 
     if not key:
-        conn.close()
         return jsonify({'error': f'{platform} 暂无可用资源'}), 400
 
     key_id = key['id']
@@ -231,7 +268,9 @@ def assign_by_platform():
 
     cursor.execute('SELECT api_key FROM api_keys WHERE id = ?', (key_id,))
     result = cursor.fetchone()
-    conn.close()
+
+    add_log('assign', operator_id=user_id, key_id=key_id, platform=key['platform'], api_key=result['api_key'],
+            target_user_id=key['contributor_id'], detail=f'领取了 {key["platform"]} 的 Key')
 
     return jsonify({
         'message': '分配成功',
@@ -256,7 +295,6 @@ def assign_key(key_id):
     key = cursor.fetchone()
 
     if not key:
-        conn.close()
         return jsonify({'error': '该Key不可用'}), 400
 
     cursor.execute(
@@ -267,7 +305,9 @@ def assign_key(key_id):
 
     cursor.execute('SELECT api_key FROM api_keys WHERE id = ?', (key_id,))
     result = cursor.fetchone()
-    conn.close()
+
+    add_log('assign', operator_id=user_id, key_id=key_id, platform=key['platform'], api_key=result['api_key'],
+            target_user_id=key['contributor_id'], detail=f'领取了 {key["platform"]} 的 Key')
 
     return jsonify({
         'message': '分配成功',
@@ -328,7 +368,6 @@ def get_my_keys():
         } for k in using_keys]
     }
 
-    conn.close()
     return jsonify(result)
 
 
@@ -347,12 +386,13 @@ def disable_key(key_id):
     key = cursor.fetchone()
 
     if not key:
-        conn.close()
         return jsonify({'error': '无权操作'}), 403
 
     cursor.execute('UPDATE api_keys SET status = ? WHERE id = ?', ('disabled', key_id))
     conn.commit()
-    conn.close()
+
+    add_log('disable', operator_id=user_id, key_id=key_id, platform=key['platform'], api_key=key['api_key'],
+            target_user_id=key['assigned_to'], detail=f'禁用了 {key["platform"]} 的 Key')
 
     return jsonify({'message': '已禁用'})
 
@@ -374,14 +414,66 @@ def get_stats():
     cursor.execute('SELECT DISTINCT platform FROM api_keys')
     platforms = [row['platform'] for row in cursor.fetchall()]
 
-    conn.close()
-
     return jsonify({
         'user_count': user_count,
         'available_keys': available_keys,
         'assigned_keys': assigned_keys,
         'platforms': platforms
     })
+
+
+@app.route('/api/logs', methods=['GET'])
+def get_logs():
+    user_id = request.args.get('user_id')
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 50))
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if user_id:
+        cursor.execute('''
+            SELECT l.*, 
+                   u1.username as operator_name,
+                   u2.username as target_user_name
+            FROM key_logs l
+            LEFT JOIN users u1 ON l.operator_id = u1.id
+            LEFT JOIN users u2 ON l.target_user_id = u2.id
+            WHERE l.operator_id = ? OR l.target_user_id = ?
+            ORDER BY l.created_at DESC
+            LIMIT ? OFFSET ?
+        ''', (user_id, user_id, per_page, (page - 1) * per_page))
+    else:
+        cursor.execute('''
+            SELECT l.*, 
+                   u1.username as operator_name,
+                   u2.username as target_user_name
+            FROM key_logs l
+            LEFT JOIN users u1 ON l.operator_id = u1.id
+            LEFT JOIN users u2 ON l.target_user_id = u2.id
+            ORDER BY l.created_at DESC
+            LIMIT ? OFFSET ?
+        ''', (per_page, (page - 1) * per_page))
+
+    logs = cursor.fetchall()
+
+    result = []
+    for log in logs:
+        result.append({
+            'id': log['id'],
+            'action': log['action'],
+            'key_id': log['key_id'],
+            'platform': log['platform'],
+            'api_key_masked': log['api_key_masked'],
+            'operator_id': log['operator_id'],
+            'operator_name': log['operator_name'],
+            'target_user_id': log['target_user_id'],
+            'target_user_name': log['target_user_name'],
+            'detail': log['detail'],
+            'created_at': log['created_at']
+        })
+
+    return jsonify(result)
 
 
 if __name__ == '__main__':
