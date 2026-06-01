@@ -170,10 +170,15 @@ function toggleAuthMode() {
     const btn = document.getElementById('authSubmitBtn');
     const toggleText = document.getElementById('authToggleText');
     const toggleLink = document.getElementById('authToggleLink');
+    const registerFields = document.querySelectorAll('.register-only');
 
     btn.textContent = isLoginMode ? '登录' : '注册';
     toggleText.textContent = isLoginMode ? '没有账号？' : '已有账号？';
     toggleLink.textContent = isLoginMode ? '立即注册' : '去登录';
+
+    registerFields.forEach(field => {
+        field.style.display = isLoginMode ? 'none' : 'block';
+    });
 
     if (typeof gsap !== 'undefined') {
         // 按钮文字切换动画
@@ -195,6 +200,8 @@ async function handleAuthSubmit(e) {
     e.preventDefault();
     const username = document.getElementById('authUsername').value;
     const password = document.getElementById('authPassword').value;
+    const wechatId = document.getElementById('authWechatId').value;
+    const phone = document.getElementById('authPhone').value;
     const btn = document.getElementById('authSubmitBtn');
 
     const endpoint = isLoginMode ? '/api/login' : '/api/register';
@@ -209,10 +216,16 @@ async function handleAuthSubmit(e) {
     }
 
     try {
+        const body = { username, password };
+        if (!isLoginMode) {
+            body.wechat_id = wechatId;
+            body.phone = phone;
+        }
+
         const response = await fetch(API_BASE + endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify(body)
         });
 
         const data = await response.json();
@@ -369,6 +382,7 @@ async function loadStats() {
         animateCounter('statUsers', data.user_count);
         animateCounter('statAvailable', data.available_keys);
         animateCounter('statAssigned', data.assigned_keys);
+        animateCounter('statExpired', data.expired_keys || 0);
         animateCounter('statPlatforms', data.platforms.length);
 
         if (typeof gsap !== 'undefined') {
@@ -696,6 +710,17 @@ async function handleContributeSubmit(e) {
             }
             
             loadStats();
+            
+            // 防止重复提交：2秒后才能再次点击
+            setTimeout(() => {
+                btn.textContent = '提交贡献';
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(btn, { scale: 1, duration: 0.2, ease: 'power2.out' });
+                }
+            }, 2000);
+            return;
         } else {
             showToast(data.error || '提交失败', 'error');
         }
@@ -880,7 +905,7 @@ function renderKeyCard(key, type) {
     if (type === 'browse') {
         statusHtml = '<span class="key-status status-available">可用</span>';
     } else if (type === 'contributed') {
-        const statusMap = { 'available': '可用', 'assigned': '已分配', 'disabled': '已禁用' };
+        const statusMap = { 'available': '可用', 'assigned': '已分配', 'disabled': '已禁用', 'expired': '已过期' };
         statusHtml = `<span class="key-status status-${key.status}">${statusMap[key.status] || key.status}</span>`;
     }
 
@@ -895,6 +920,12 @@ function renderKeyCard(key, type) {
         actionsHtml = `
             <div class="key-actions">
                 <button class="btn btn-danger" data-action="disable" data-key-id="${key.id}">禁用</button>
+            </div>
+        `;
+    } else if (type === 'contributed' && key.status === 'expired') {
+        actionsHtml = `
+            <div class="key-actions">
+                <button class="btn btn-secondary" disabled>已过期</button>
             </div>
         `;
     }

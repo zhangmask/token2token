@@ -1,2 +1,4 @@
-flask
-flask-cors
+flask==3.0.0
+flask-cors==4.0.0
+apscheduler==3.10.4
+gunicorn==21.2.0

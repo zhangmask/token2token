@@ -422,6 +422,11 @@ nav {
     color: var(--apple-orange);
 }
 
+.status-expired {
+    background: rgba(110, 110, 115, 0.15);
+    color: var(--text-muted);
+}
+
 .key-models {
     display: flex;
     flex-wrap: wrap;
