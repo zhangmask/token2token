@@ -8,6 +8,12 @@ import logging
 import subprocess
 from datetime import datetime
 
+import base64
+import tarfile
+import io
+import shutil
+
+
 app = Flask(__name__, static_folder='static')
 CORS(app)
 
@@ -30,6 +36,46 @@ TABLE_KEYS = 'tblwtR3Bwe46Okuq'
 TABLE_LOGS = 'tbldld5Eb3WhU7T0'
 
 
+def init_lark_cli():
+    config_b64 = os.environ.get('LARK_CLI_CONFIG', '')
+    if not config_b64:
+        logger.warning('LARK_CLI_CONFIG 未设置，飞书功能不可用')
+        return
+    
+    import platform as pf
+    if pf.system() != "Windows":
+        home = os.path.expanduser('~')
+        config_dir = os.path.join(home, '.lark-cli')
+        if not os.path.exists(config_dir):
+            os.makedirs(config_dir, exist_ok=True)
+            try:
+                decoded = base64.b64decode(config_b64)
+                buf = io.BytesIO(decoded)
+                with tarfile.open(fileobj=buf, mode='r:gz') as tar:
+                    tar.extractall(path=config_dir)
+                logger.info(f'飞书认证配置已恢复至 {config_dir}')
+            except Exception as e:
+                logger.error(f'恢复飞书配置失败: {e}')
+
+
+def ensure_lark_cli_installed():
+    import platform as pf
+    if pf.system() == "Windows":
+        return
+    
+    cli_exists = shutil.which('lark-cli')
+    if cli_exists:
+        return
+    
+    logger.info('正在安装 lark-cli...')
+    try:
+        subprocess.run(['npm', 'install', '-g', '@larksuiteoapi/cli'],
+                       capture_output=True, text=True, timeout=60)
+        logger.info('lark-cli 安装成功')
+    except Exception as e:
+        logger.error(f'lark-cli 安装失败: {e}')
+
+
 class LarkBase:
     @staticmethod
     def find_cli():
@@ -40,7 +86,7 @@ class LarkBase:
             if os.path.exists(npm_global):
                 paths.insert(0, npm_global)
         else:
-            paths = ['lark-cli', os.path.expanduser('~/.npm-global/bin/lark-cli'), '/usr/local/bin/lark-cli', '/opt/render/.npm-global/bin/lark-cli']
+            paths = ['lark-cli', os.path.expanduser('~/.npm-global/bin/lark-cli'), '/usr/local/bin/lark-cli', shutil.which('lark-cli') or '']
         for p in paths:
             try:
                 result = subprocess.run([p, '--version'], capture_output=True, text=True, timeout=5)
@@ -660,6 +706,15 @@ def get_logs():
         })
 
     return jsonify(result)
+
+
+@app.route('/healthz')
+def healthz():
+    return 'ok'
+
+
+ensure_lark_cli_installed()
+init_lark_cli()
 
 
 if __name__ == '__main__':

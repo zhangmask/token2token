@@ -4,7 +4,7 @@
 
 **适合场景**：群内成员互相共享 API Key，每人每天最多领一个，可追溯、可管理。
 
-> 本项目基于飞书多维表格存储数据，无需自建数据库。
+> 项目部署在 [Zeabur](https://zeabur.com)，数据存储在飞书多维表格，无需自建数据库。
 
 ---
 
@@ -12,7 +12,7 @@
 
 ### 1. 打开网页
 
-管理员部署好后，会给你一个链接（例如 `https://tokenplan.onrender.com`）。
+管理员部署好后，会给你一个链接（例如 `https://tokenplan.zeabur.app`）。
 
 打开这个链接，注册账号即可使用。
 
@@ -64,15 +64,62 @@
 
 ---
 
-## 项目文件说明（供参考）
+## 部署到 Zeabur
+
+### 前置条件
+
+1. 在本地安装 lark-cli 并登录：
+
+```bash
+npm install -g @larksuiteoapi/cli
+lark-cli auth login --domain base
+```
+
+2. 导出飞书认证配置：
+
+```bash
+# Windows
+python -c "
+import os, tarfile, base64, io
+home = os.path.expanduser('~')
+config_dir = os.path.join(home, '.lark-cli')
+buf = io.BytesIO()
+with tarfile.open(fileobj=buf, mode='w:gz') as tar:
+    tar.add(config_dir, arcname='.')
+print(base64.b64encode(buf.getvalue()).decode())
+"
+```
+
+复制输出的 base64 字符串，后续会用到。
+
+### Zeabur 部署步骤
+
+1. **Fork 或 Push 代码到 GitHub**
+
+2. **打开 [Zeabur](https://zeabur.com)**
+   - 点击 **Create Project** → **Git Repository**
+   - 连接你的 GitHub 仓库
+   - Zeabur 自动识别为 Python 项目
+
+3. **配置环境变量**
+   - 在项目设置中添加 `LARK_CLI_CONFIG`
+   - 值粘贴刚才导出的 base64 字符串
+
+4. **等待部署完成**
+   - Zeabur 会自动安装依赖、启动服务
+   - 部署完成后会分配一个 `https://xxx.zeabur.app` 的链接
+
+5. **把链接发到群里，大家就能用了 🎉**
+
+---
+
+## 项目文件结构
 
 ```
 tokenplan/
 ├── app.py              # 后端服务
 ├── requirements.txt    # Python 依赖
 ├── runtime.txt         # Python 版本
-├── render-build.sh     # Render 构建脚本
-├── setup_render.py     # 部署配置工具
 ├── README.md           # 本文件
 └── static/
     ├── index.html      # 前端页面
